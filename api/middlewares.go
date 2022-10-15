@@ -32,12 +32,11 @@ func Authentication(c *gin.Context) {
 			c.Abort()
 			return
 		} else {
-			h := md5.New()
 			body := []byte{}
 			c.Request.Body.Read(body)
-			sign := h.Sum([]byte(c.Request.Method + c.Request.URL.String() + string(body) + authSecreteKey))
-			fmt.Println(string(sign))
-			if string(sign) != secret {
+			sign := md5.Sum([]byte(c.Request.Method + c.Request.URL.String() + string(body) + authSecreteKey))
+			signStr := fmt.Sprintf("%x", sign)
+			if signStr != secret {
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"isOk":    false,
 					"message": "user is unauthenticated",
