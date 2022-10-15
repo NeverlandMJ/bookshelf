@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/NeverlandMJ/bookshelf/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,9 @@ func NewRouter(serv *service.Service) *gin.Engine {
 	router.Use(cors.New(config))
 
 	router.POST("/signup", h.SignUp)
+	router.GET("/hi", func(ctx *gin.Context) {
+		fmt.Fprintln(ctx.Writer, "App is running")
+	})
 
 	authorized := router.Group("/")
 	authorized.Use(Authentication)
