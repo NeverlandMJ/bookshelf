@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
 	"github.com/NeverlandMJ/bookshelf/server"
@@ -72,7 +73,7 @@ func (s Service) GetAllBooks(ctx context.Context) ([]entity.ResponseBook, error)
 	return respBooks, nil
 }
 
-func (s Service) EditBook(ctx context.Context, status, id int) (entity.ResponseBook, error) {
+func (s Service) EditBook(ctx context.Context, status entity.EditBookReq, id int) (entity.ResponseBook, error) {
 	book, err := s.Repo.EditBook(ctx, status, id)
 	if err != nil {
 		return entity.ResponseBook{}, err

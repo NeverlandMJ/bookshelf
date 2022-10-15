@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
-	"github.com/NeverlandMJ/bookshelf/pkg/entity"
-	"github.com/NeverlandMJ/bookshelf/service"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
+	"github.com/NeverlandMJ/bookshelf/pkg/entity"
+	"github.com/NeverlandMJ/bookshelf/service"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
 )
 
 type Handler struct {
@@ -52,26 +53,6 @@ func (h Handler) SignUp(c *gin.Context) {
 	}
 
 	user, err := h.srvc.SaveUser(context.Background(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"isOk":    false,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	// creating session for the user
-	var secrete string = user.Secret
-	session, err := Store.Get(c.Request, user.Key)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"isOk":    false,
-			"message": err.Error(),
-		})
-		return
-	}
-	session.Values[user.Key] = secrete
-	err = session.Save(c.Request, c.Writer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
@@ -216,7 +197,7 @@ func (h Handler) EditBook(c *gin.Context) {
 		})
 	}
 
-	var status entity.EditBook
+	var status entity.EditBookReq
 	if err := c.BindJSON(&status); err != nil {
 		c.JSON(http.StatusBadRequest, entity.Response{
 			IsOk:    false,
@@ -225,7 +206,7 @@ func (h Handler) EditBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.srvc.EditBook(context.Background(), status.Status, id)
+	book, err := h.srvc.EditBook(context.Background(), status, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			IsOk:    false,
@@ -268,8 +249,8 @@ func (h Handler) DeleteBook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, entity.Response{
-		Data: "Successfully deleted",
-		IsOk: true,
+		Data:    "Successfully deleted",
+		IsOk:    true,
 		Message: "ok",
 	})
 }

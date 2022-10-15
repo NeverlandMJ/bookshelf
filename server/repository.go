@@ -11,6 +11,6 @@ type Repository interface {
 	SaveBook(ctx context.Context, book entity.Book) (entity.ResponseBook, error)
 	GetBook(ctx context.Context, isbn string) (entity.BookResponseFromDatabase, error)
 	GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatabase, error)
-	EditBook(ctx context.Context, status, id int) (entity.BookResponseFromDatabase, error)
+	EditBook(ctx context.Context, status entity.EditBookReq, id int) (entity.BookResponseFromDatabase, error)
 	DeleteBook(ctx context.Context, id int) error
 }

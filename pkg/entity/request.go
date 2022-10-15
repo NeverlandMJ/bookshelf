@@ -10,8 +10,9 @@ type CreatBookRequest struct {
 	Isbn string `json:"isbn"`
 }
 
-type EditBook struct {
-	Status int `json:"status"`
+type EditBookReq struct {
+	Book   Book `json:"book"`
+	Status int  `json:"status"`
 }
 
 type Info struct {

@@ -94,13 +94,22 @@ func (s Server) GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatab
 	return books, nil
 }
 
-func (s Server) EditBook(ctx context.Context, status, id int) (entity.BookResponseFromDatabase, error) {
-	query := `UPDATE books SET status=$1 WHERE id=$2 RETURNING 
+func (s Server) EditBook(ctx context.Context, status entity.EditBookReq, id int) (entity.BookResponseFromDatabase, error) {
+	query := `UPDATE books SET 
+		isbn=$1, title=$2, author=$3, published=$4, pages=$5, status=$6  
+		WHERE id=$7 RETURNING 
 		id, isbn, title, author, published, pages, status 
 	`
 
 	var book entity.BookResponseFromDatabase
-	if err := s.DB.GetContext(ctx, &book, query, status, id); err != nil {
+	if err := s.DB.GetContext(ctx, &book, query, 
+		status.Book.Isbn, 
+		status.Book.Title, 
+		status.Book.Author, 
+		status.Book.Published, 
+		status.Book.Pages, 
+		status.Status, 
+		id); err != nil {
 		return entity.BookResponseFromDatabase{}, err
 	}
 
