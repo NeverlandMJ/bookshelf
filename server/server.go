@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+
+	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
 
 	"github.com/NeverlandMJ/bookshelf/config"
@@ -26,13 +28,16 @@ func NewServer(cnfg config.Config) (*Server, error) {
 	}, nil
 }
 
+
+// SaveUser inserts a new user into database. User key must be unique if it was not unique
+// function returns customErr.ErrSaveUserError 
 func (s Server) SaveUser(ctx context.Context, user entity.UserSignUpRequest) (entity.UserResponseFromDatabse, error) {
 	query := `INSERT INTO users (name, key, secret) VALUES ($1, $2, $3) RETURNING id`
 
 	var id int
 	err := s.DB.QueryRowContext(ctx, query, user.Name, user.Key, user.Secret).Scan(&id)
 	if err != nil {
-		return entity.UserResponseFromDatabse{}, err
+		return entity.UserResponseFromDatabse{}, customErr.ErrSaveUserError
 	}
 	return entity.UserResponseFromDatabse{
 		ID: id,
@@ -42,6 +47,9 @@ func (s Server) SaveUser(ctx context.Context, user entity.UserSignUpRequest) (en
 	}, nil
 }
 
+
+// GetUser fetches user data from database if exists.
+// If the given user doesn't exist it retursn sql.ErrNoRows
 func (s Server) GetUser(ctx context.Context, key string) (entity.UserResponseFromDatabse, error) {
 	query := `SELECT id, name, key, secret FROM users WHERE key=$1`
 	var user entity.UserResponseFromDatabse
@@ -52,6 +60,8 @@ func (s Server) GetUser(ctx context.Context, key string) (entity.UserResponseFro
 	return user, nil
 }
 
+
+// SaveBook inserts book info into databse with default status 0-new
 func (s Server) SaveBook(ctx context.Context, book entity.Book) (entity.ResponseBook, error) {
 	query := `INSERT INTO books (isbn, title, author, published, pages) 
 	VALUES ($1, $2, $3, $4, $5) RETURNING id`
@@ -73,6 +83,9 @@ func (s Server) SaveBook(ctx context.Context, book entity.Book) (entity.Response
 	}, nil
 }
 
+
+// GetBook fetches book info from database by book's isbn.
+// If the asked b[ks doesn't exist it returns sql.ErrNoRows error
 func (s Server) GetBook(ctx context.Context, isbn string) (entity.BookResponseFromDatabase, error) {
 	query := `SELECT id, isbn, title, author, published, pages, status FROM books WHERE isbn=$1`
 	var book entity.BookResponseFromDatabase
@@ -83,6 +96,8 @@ func (s Server) GetBook(ctx context.Context, isbn string) (entity.BookResponseFr
 	return book, nil
 }
 
+
+// GetAllBooks fetches all books from database
 func (s Server) GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatabase, error) {
 	query := `SELECT id, isbn, title, author, published, pages, status FROM books`
 	books := make([]entity.BookResponseFromDatabase, 0)
@@ -94,6 +109,8 @@ func (s Server) GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatab
 	return books, nil
 }
 
+
+// EditBook edits book's data
 func (s Server) EditBook(ctx context.Context, status entity.EditBookReq, id int) (entity.BookResponseFromDatabase, error) {
 	query := `UPDATE books SET 
 		isbn=$1, title=$2, author=$3, published=$4, pages=$5, status=$6  
@@ -116,10 +133,31 @@ func (s Server) EditBook(ctx context.Context, status entity.EditBookReq, id int)
 	return book, nil
 }
 
+// DeleteBook deletes book from database by id
 func (s Server) DeleteBook(ctx context.Context, id int) error {
 	query := `DELETE FROM books WHERE id=$1`
 
 	_, err := s.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+// delete this functions was written to be used as a cleanUP function inside intigrations tests
+func (s Server) delete() error {
+	_, err := s.DB.Exec(`
+		TRUNCATE users RESTART IDENTITY CASCADE;
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.DB.Exec(`
+		TRUNCATE books RESTART IDENTITY CASCADE;
+	`)
 	if err != nil {
 		return err
 	}
