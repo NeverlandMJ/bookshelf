@@ -35,10 +35,10 @@ func (s Server) SaveUser(ctx context.Context, user entity.UserSignUpRequest) (en
 		return entity.UserResponseFromDatabse{}, err
 	}
 	return entity.UserResponseFromDatabse{
-		id,
-		user.Name,
-		user.Key,
-		user.Secret,
+		ID: id,
+		Name: user.Name,
+		Key: user.Key,
+		Secret: user.Secret,
 	}, nil
 }
 
@@ -68,8 +68,8 @@ func (s Server) SaveBook(ctx context.Context, book entity.Book) (entity.Response
 	}
 
 	return entity.ResponseBook{
-		book,
-		0,
+		Book: book,
+		Status: 0,
 	}, nil
 }
 
