@@ -101,7 +101,7 @@ func (h Handler) GetUser(c *gin.Context) {
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "user is unauthenticated: sign and secret is not equal",
+			"message": "user is unauthenticated: sign and secret is not equal" + secret  + " " + sign,
 		})
 		c.Abort()
 		return
