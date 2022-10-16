@@ -87,13 +87,13 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	r := c.Request.URL
-	url := r.String()
+	// r := c.Request.URL
+	// url := r.String()
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	fmt.Println(string(jsonData))
 
-	secretByte := md5.Sum([]byte(c.Request.Method + url +"{"+string(jsonData)+"}" + user.Secret))
+	secretByte := md5.Sum([]byte("GET" + "/myself" +"{"+string(jsonData)+"}" + user.Secret))
 
 	secret := fmt.Sprintf("%x", secretByte)
 
