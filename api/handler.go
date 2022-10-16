@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -86,19 +85,19 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	if reflect.DeepEqual(user, entity.ResponseBook{}) {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	scheme := "https://"
-	// if c.Request.TLS == nil {
-	// 	scheme = "http://"
+	// if reflect.DeepEqual(user, entity.ResponseBook{}) {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{
+	// 		"isOk":    false,
+	// 		"message": err.Error(),
+	// 	})
+	// 	return
 	// }
-	url := scheme + c.Request.Host + c.Request.URL.Path 
+
+	scheme := "http://"
+	if c.Request.TLS != nil {
+		scheme = "https://"
+	}
+	url := scheme + c.Request.Host + c.Request.URL.Path
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	fmt.Println(string(jsonData))
@@ -107,16 +106,10 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	secret := fmt.Sprintf("%x", secretByte)
 
-	m := fmt.Sprintf("method: %s", c.Request.Method)
-	u := fmt.Sprintf("url: %s", url)
-	b := fmt.Sprintf("body: %s", string(jsonData))
-	s := fmt.Sprintf("secret: %s", user.Secret)
-
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": m+u+b+s+" = " + secret,
-			"sign": sign,
+			"message": "incorrect sign",
 		})
 		return
 	}
