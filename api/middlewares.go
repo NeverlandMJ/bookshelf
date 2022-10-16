@@ -50,10 +50,8 @@ func (h Handler) Authentication(c *gin.Context) {
 		}
 		userSecret = user.Secret
 	}
-	scheme := "http://"
-	if c.Request.TLS != nil {
-		scheme = "https://"
-	}
+
+	scheme := "https://"
 	url := scheme + c.Request.Host + c.Request.URL.Path
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)

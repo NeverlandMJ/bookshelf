@@ -35,7 +35,7 @@ func Connect(cfg config.Config) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err = m.Drop(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return nil, err
 	}
 
