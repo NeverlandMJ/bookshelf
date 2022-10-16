@@ -54,11 +54,7 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:    user.Key,
-		Value:   user.Secret,
-	})
-
+	
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,
 		IsOk:    true,
