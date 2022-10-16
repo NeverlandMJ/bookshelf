@@ -37,6 +37,7 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(req)
 	if err := req.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"isOk":    false,
@@ -54,6 +55,7 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
 	
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,

@@ -12,7 +12,7 @@ func Authentication(c *gin.Context) {
 	if key == "" || sign == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "1user is unauthenticated",
+			"message": "user is unauthenticated",
 		})
 		c.Abort()
 		return
