@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -57,7 +58,7 @@ func (h Handler) SignUp(c *gin.Context) {
 	}
 
 	fmt.Println(user)
-	
+
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,
 		IsOk:    true,
@@ -67,9 +68,9 @@ func (h Handler) SignUp(c *gin.Context) {
 
 func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
-	secret := c.GetHeader("Sign")
-	fmt.Println(secret)
-	
+	sign := c.GetHeader("Sign")
+	// fmt.Println(secret)
+
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -79,11 +80,30 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	if reflect.DeepEqual(user, entity.ResponseBook{}){
+	if reflect.DeepEqual(user, entity.ResponseBook{}) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
 		})
+		return
+	}
+
+	r := c.Request.URL
+	url := r.String()
+
+	body := []byte{}
+	c.Request.Body.Read(body)
+
+	secretByte := md5.Sum([]byte(c.Request.Method + url + string(body) + user.Secret))
+
+	secret := fmt.Sprintf("%x", secretByte)
+
+	if secret != sign {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"isOk":    false,
+			"message": "user is unauthenticated: sign and secret is not equal",
+		})
+		c.Abort()
 		return
 	}
 
@@ -93,7 +113,6 @@ func (h Handler) GetUser(c *gin.Context) {
 		Message: "ok",
 	})
 }
-
 
 func (h Handler) SaveBook(c *gin.Context) {
 	// reading isbn from body
