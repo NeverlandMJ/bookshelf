@@ -69,7 +69,6 @@ func (h Handler) SignUp(c *gin.Context) {
 func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
 	sign := c.GetHeader("Sign")
-	// fmt.Println(secret)
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
@@ -91,7 +90,10 @@ func (h Handler) GetUser(c *gin.Context) {
 	r := c.Request.URL
 	url := r.String()
 
-	secretByte := md5.Sum([]byte(c.Request.Method + url + user.Secret))
+	jsonData, _ := ioutil.ReadAll(c.Request.Body)
+	fmt.Println(string(jsonData))
+
+	secretByte := md5.Sum([]byte(c.Request.Method + url +"{"+string(jsonData)+"}" + user.Secret))
 
 	secret := fmt.Sprintf("%x", secretByte)
 
