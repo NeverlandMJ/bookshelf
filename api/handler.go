@@ -64,7 +64,8 @@ func (h Handler) SignUp(c *gin.Context) {
 
 func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
-
+	secret := c.GetHeader("Sign")
+	fmt.Println(secret)
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
