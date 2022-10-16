@@ -143,7 +143,7 @@ func TestServer_GetBook(t *testing.T) {
 			Author:    "Eben Upton",
 			Published: 2012,
 			Pages:     221,
-			Status: 0,
+			Status:    0,
 		}
 
 		_, err := s.SaveBook(context.Background(), testBook1)
@@ -195,7 +195,6 @@ func TestServer_GetAllBooks(t *testing.T) {
 	})
 }
 
-
 func TestServer_EditBook(t *testing.T) {
 	s := newServer(t)
 	t.Cleanup(cleanUpFn(s))
@@ -207,7 +206,7 @@ func TestServer_EditBook(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := s.EditBook(context.Background(), entity.EditBookReq{
-			Book: b.Book,
+			Book:   b.Book,
 			Status: 1,
 		}, b.Book.ID)
 
@@ -218,7 +217,6 @@ func TestServer_EditBook(t *testing.T) {
 
 		assert.Equal(t, want, got)
 	})
-
 
 }
 
@@ -263,7 +261,7 @@ func newServer(t *testing.T) *Server {
 
 func cleanUpFn(s *Server) func() {
 	return func() {
-		if err := s.delete(); err != nil {
+		if err := s.Delete(); err != nil {
 			log.Println("CLEANUP OF DB FAILED!", err.Error())
 		}
 	}

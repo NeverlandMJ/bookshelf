@@ -93,3 +93,7 @@ func (s Service) EditBook(ctx context.Context, status entity.EditBookReq, id int
 func (s Service) DeleteBook(ctx context.Context, id int) error {
 	return s.Repo.DeleteBook(ctx, id)
 }
+
+func (s Service) CleanUP() error {
+	return s.Repo.Delete()
+}

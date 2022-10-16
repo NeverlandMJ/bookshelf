@@ -79,7 +79,7 @@ func (h Handler) GetUser(c *gin.Context) {
 			})
 			return
 		}
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
 		})
@@ -277,6 +277,22 @@ func (h Handler) DeleteBook(c *gin.Context) {
 		Data:    "Successfully deleted",
 		IsOk:    true,
 		Message: "ok",
+	})
+}
+
+func (h Handler) Delete(c *gin.Context) {
+	err := h.srvc.CleanUP()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"isOk":    false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"isOk":    true,
+		"message": "cleaned up",
 	})
 }
 

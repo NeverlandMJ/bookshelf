@@ -138,8 +138,8 @@ func (s Server) DeleteBook(ctx context.Context, id int) error {
 	return nil
 }
 
-// delete this functions was written to be used as a cleanUP function inside intigrations tests
-func (s Server) delete() error {
+// Delete this functions was written to be used as a cleanUP function inside intigrations tests
+func (s Server) Delete() error {
 	_, err := s.DB.Exec(`
 		TRUNCATE users RESTART IDENTITY CASCADE;
 	`)
