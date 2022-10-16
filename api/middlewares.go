@@ -24,20 +24,13 @@ func (h Handler) Authentication(c *gin.Context) {
 		return
 	}
 
-	// check if the user's secret has been catched 
+	// check if the user's secret has been catched
 	value, found := newCache.Get(key)
 	userSecret, ok := value.(string)
 	if !found || !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": "user is unauthenticated: session is empty",
-		})
-		c.Abort()
-		return
-	} else {
-	// if user's secret key has not been cached or due to crashes on server cach has been destroyed 
-	// we will get user key directly from database
-	// this method is used to reduce number of database calls 
+		// if user's secret key has not been cached or due to crashes on server cach has been destroyed
+		// we will get user key directly from database
+		// this method is used to reduce number of database calls
 		user, err := h.srvc.GetUser(context.Background(), key)
 		if err != nil {
 			if errors.Is(err, customErr.ErrNotFound) {
@@ -57,7 +50,6 @@ func (h Handler) Authentication(c *gin.Context) {
 		}
 		userSecret = user.Secret
 	}
-
 	scheme := "http://"
 	if c.Request.TLS != nil {
 		scheme = "https://"
