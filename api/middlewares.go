@@ -39,16 +39,16 @@ func (h Handler) Authentication(c *gin.Context) {
 
 	secretByte := md5.Sum([]byte(c.Request.Method + url + string(body) + got.Secret))
 
-	secret := fmt.Sprintf("%x", secretByte)
+	_ = fmt.Sprintf("%x", secretByte)
 
-	if secret != sign {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": "user is unauthenticated: sign and secret is not equal",
-		})
-		c.Abort()
-		return
-	}
+	// if secret != sign {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{
+	// 		"isOk":    false,
+	// 		"message": "user is unauthenticated: sign and secret is not equal",
+	// 	})
+	// 	c.Abort()
+	// 	return
+	// }
 
 	c.Next()
 }
