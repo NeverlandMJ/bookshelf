@@ -32,28 +32,13 @@ func NewServer(cnfg config.Config) (*Server, error) {
 // SaveUser inserts a new user into database. User key must be unique if it was not unique
 // function returns customErr.ErrSaveUserError 
 func (s Server) SaveUser(ctx context.Context, user entity.UserSignUpRequest) (entity.UserResponseFromDatabse, error) {
-	tx, err := s.DB.BeginTxx(ctx, nil)
-	if err != nil {
-		tx.Rollback()
-		return entity.UserResponseFromDatabse{}, err
-	}
-
-	_, err = tx.ExecContext(ctx, `TRUNCATE users RESTART IDENTITY CASCADE`)
-	if err != nil {
-		tx.Rollback()
-		return entity.UserResponseFromDatabse{}, err
-	}
-
 	query := `INSERT INTO users (name, key, secret) VALUES ($1, $2, $3) RETURNING id`
 
 	var id int
-	err = tx.QueryRowContext(ctx, query, user.Name, user.Key, user.Secret).Scan(&id)
+	err := s.DB.QueryRowContext(ctx, query, user.Name, user.Key, user.Secret).Scan(&id)
 	if err != nil {
-		tx.Rollback()
 		return entity.UserResponseFromDatabse{}, customErr.ErrSaveUserError
 	}
-
-	tx.Commit()
 	return entity.UserResponseFromDatabse{
 		ID: id,
 		Name: user.Name,

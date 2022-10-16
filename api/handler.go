@@ -66,13 +66,13 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
-		if errors.Is(err, customErr.ErrNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"isOk":    false,
-				"message": err.Error(),
-			})
-			return
-		}
+		// if errors.Is(err, customErr.ErrNotFound) {
+		// 	c.JSON(http.StatusNotFound, gin.H{
+		// 		"isOk":    false,
+		// 		"message": err.Error(),
+		// 	})
+		// 	return
+		// }
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
