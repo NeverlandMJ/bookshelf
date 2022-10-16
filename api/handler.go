@@ -15,7 +15,6 @@ import (
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
 	"github.com/NeverlandMJ/bookshelf/service"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/sessions"
 )
 
 type Handler struct {
@@ -26,12 +25,6 @@ func NewHandler(srv *service.Service) Handler {
 	return Handler{
 		srvc: srv,
 	}
-}
-
-var Store *sessions.CookieStore
-
-func init() {
-	Store = sessions.NewCookieStore([]byte("secret-key"))
 }
 
 func (h Handler) SignUp(c *gin.Context) {
@@ -73,13 +66,13 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
-		if errors.Is(err, customErr.ErrNotFound) {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"isOk":    false,
-				"message": err.Error(),
-			})
-			return
-		}
+		// if errors.Is(err, customErr.ErrNotFound) {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"isOk":    false,
+		// 		"message": err.Error(),
+		// 	})
+		// 	return
+		// }
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
