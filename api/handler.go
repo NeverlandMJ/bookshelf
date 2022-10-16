@@ -94,11 +94,11 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	scheme := "http://"
-	if c.Request.TLS != nil {
-		scheme = "https://"
+	scheme := "https://"
+	if c.Request.TLS == nil {
+		scheme = "http://"
 	}
-	url := scheme + c.Request.Host + c.Request.URL.Path
+	url := scheme + c.Request.Host + c.Request.URL.Path 
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	fmt.Println(string(jsonData))
