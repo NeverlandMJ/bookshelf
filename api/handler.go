@@ -80,7 +80,7 @@ func (h Handler) GetUser(c *gin.Context) {
 	}
 
 	if reflect.DeepEqual(user, entity.ResponseBook{}){
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
 		})
