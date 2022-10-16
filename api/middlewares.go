@@ -15,7 +15,7 @@ func (h Handler) Authentication(c *gin.Context) {
 	if key == "" ||  sign== "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "1user is unauthenticated",
+			"message": "user is unauthenticated: header is empty",
 		})
 		c.Abort()
 		return
@@ -25,7 +25,7 @@ func (h Handler) Authentication(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "1user is unauthenticated",
+			"message": "user is unauthenticated: user not signed up",
 		})
 		c.Abort()
 		return
@@ -44,16 +44,7 @@ func (h Handler) Authentication(c *gin.Context) {
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "1user is unauthenticated",
-		})
-		c.Abort()
-		return
-	}
-
-	if secret != sign {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": "1user is unauthenticated",
+			"message": "user is unauthenticated: sign and secret is not equal",
 		})
 		c.Abort()
 		return
