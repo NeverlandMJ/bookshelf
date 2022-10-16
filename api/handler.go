@@ -28,6 +28,7 @@ func NewHandler(srv *service.Service) Handler {
 	}
 }
 
+// I am going to store secret keys inside cache to reduce number of database calls
 var newCache *cache.Cache
 
 func init() {

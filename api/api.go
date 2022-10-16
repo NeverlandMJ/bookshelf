@@ -19,7 +19,7 @@ func NewRouter(serv *service.Service) *gin.Engine {
 	})
 
 	auth := router.Group("/")
-	auth.Use(Authentication)
+	auth.Use(h.Authentication)
 	auth.GET("/myself", h.GetUser)
 	auth.POST("/books", h.SaveBook)
 	auth.GET("/books", h.GetAllBooks)

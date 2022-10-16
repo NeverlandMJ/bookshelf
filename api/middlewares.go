@@ -1,15 +1,18 @@
 package api
 
 import (
+	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
 	"github.com/gin-gonic/gin"
 )
 
-func Authentication(c *gin.Context) {
+func (h Handler) Authentication(c *gin.Context) {
 	key := c.GetHeader("Key")
 	sign := c.GetHeader("Sign")
 	if key == "" || sign == "" {
@@ -21,8 +24,10 @@ func Authentication(c *gin.Context) {
 		return
 	}
 
-	userSecret, found := newCache.Get(key)
-	if !found {
+	// check if the user's secret has been catched 
+	value, found := newCache.Get(key)
+	userSecret, ok := value.(string)
+	if !found || !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
 			"message": "user is unauthenticated: session is empty",
@@ -30,32 +35,49 @@ func Authentication(c *gin.Context) {
 		c.Abort()
 		return
 	} else {
-		scheme := "https://"
-		// if c.Request.TLS == nil {
-		// 	scheme = "http://"
-		// }
-		url := scheme + c.Request.Host + c.Request.URL.Path
-
-		jsonData, _ := ioutil.ReadAll(c.Request.Body)
-		fmt.Println(string(jsonData))
-
-		secretByte := md5.Sum([]byte(c.Request.Method + url + string(jsonData) + userSecret.(string)))
-
-		secret := fmt.Sprintf("%x", secretByte)
-
-		fmt.Println("method: ", c.Request.Method)
-		fmt.Println("url: ", url)
-		fmt.Println("body: ", string(jsonData))
-		fmt.Println("secret: ", userSecret)
-
-		if secret != sign {
-			c.JSON(http.StatusUnauthorized, gin.H{
+	// if user's secret key has not been cached or due to crashes on server cach has been destroyed 
+	// we will get user key directly from database
+	// this method is used to reduce number of database calls 
+		user, err := h.srvc.GetUser(context.Background(), key)
+		if err != nil {
+			if errors.Is(err, customErr.ErrNotFound) {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"isOk":    false,
+					"message": err.Error(),
+				})
+				c.Abort()
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{
 				"isOk":    false,
-				"message": "incorrect sign",
+				"message": err.Error(),
 			})
 			c.Abort()
 			return
 		}
+		userSecret = user.Secret
+	}
+
+	scheme := "http://"
+	if c.Request.TLS != nil {
+		scheme = "https://"
+	}
+	url := scheme + c.Request.Host + c.Request.URL.Path
+
+	jsonData, _ := ioutil.ReadAll(c.Request.Body)
+	fmt.Println(string(jsonData))
+
+	secretByte := md5.Sum([]byte(c.Request.Method + url + string(jsonData) + userSecret))
+
+	secret := fmt.Sprintf("%x", secretByte)
+
+	if secret != sign {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"isOk":    false,
+			"message": "incorrect sign",
+		})
+		c.Abort()
+		return
 	}
 
 	c.Next()
