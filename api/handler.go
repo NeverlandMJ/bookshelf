@@ -54,6 +54,11 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:    user.Key,
+		Value:   user.Secret,
+	})
+
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,
 		IsOk:    true,
@@ -66,13 +71,6 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
-		// if errors.Is(err, customErr.ErrNotFound) {
-		// 	c.JSON(http.StatusNotFound, gin.H{
-		// 		"isOk":    false,
-		// 		"message": err.Error(),
-		// 	})
-		// 	return
-		// }
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
@@ -86,6 +84,7 @@ func (h Handler) GetUser(c *gin.Context) {
 		Message: "ok",
 	})
 }
+
 
 func (h Handler) SaveBook(c *gin.Context) {
 	// reading isbn from body
