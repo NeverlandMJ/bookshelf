@@ -98,10 +98,12 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	secret := fmt.Sprintf("%x", secretByte)
 
+	message := fmt.Sprintf("method: %s\n url: %s\n body: %s\n secret: %s", c.Request.Method, url, string(body), secret)
+
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "user is unauthenticated: sign and secret is not equal" + secret  + " " + sign,
+			"message": message + "sign and secret is not equal" + secret  + " " + sign,
 		})
 		c.Abort()
 		return
