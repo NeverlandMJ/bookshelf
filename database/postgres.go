@@ -16,7 +16,7 @@ func Connect(cfg config.Config) (*sqlx.DB, error) {
 	db, err := sqlx.Connect(
 		"postgres",
 		fmt.Sprintf(
-			"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 			cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUser, cfg.PostgresPassword, cfg.PostgresDB,
 		),
 	)
@@ -34,7 +34,7 @@ func Connect(cfg config.Config) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err = m.Drop(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return nil, err
 	}
 

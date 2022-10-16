@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 
-	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
 
 	"github.com/NeverlandMJ/bookshelf/config"
@@ -28,25 +27,23 @@ func NewServer(cnfg config.Config) (*Server, error) {
 	}, nil
 }
 
-
 // SaveUser inserts a new user into database. User key must be unique if it was not unique
-// function returns customErr.ErrSaveUserError 
+// function returns customErr.ErrSaveUserError
 func (s Server) SaveUser(ctx context.Context, user entity.UserSignUpRequest) (entity.UserResponseFromDatabse, error) {
 	query := `INSERT INTO users (name, key, secret) VALUES ($1, $2, $3) RETURNING id`
 
 	var id int
 	err := s.DB.QueryRowContext(ctx, query, user.Name, user.Key, user.Secret).Scan(&id)
 	if err != nil {
-		return entity.UserResponseFromDatabse{}, customErr.ErrSaveUserError
+		return entity.UserResponseFromDatabse{}, err
 	}
 	return entity.UserResponseFromDatabse{
-		ID: id,
-		Name: user.Name,
-		Key: user.Key,
+		ID:     id,
+		Name:   user.Name,
+		Key:    user.Key,
 		Secret: user.Secret,
 	}, nil
 }
-
 
 // GetUser fetches user data from database if exists.
 // If the given user doesn't exist it retursn sql.ErrNoRows
@@ -59,7 +56,6 @@ func (s Server) GetUser(ctx context.Context, key string) (entity.UserResponseFro
 
 	return user, nil
 }
-
 
 // SaveBook inserts book info into databse with default status 0-new
 func (s Server) SaveBook(ctx context.Context, book entity.Book) (entity.ResponseBook, error) {
@@ -78,11 +74,10 @@ func (s Server) SaveBook(ctx context.Context, book entity.Book) (entity.Response
 	}
 
 	return entity.ResponseBook{
-		Book: book,
+		Book:   book,
 		Status: 0,
 	}, nil
 }
-
 
 // GetBook fetches book info from database by book's isbn.
 // If the asked b[ks doesn't exist it returns sql.ErrNoRows error
@@ -96,7 +91,6 @@ func (s Server) GetBook(ctx context.Context, isbn string) (entity.BookResponseFr
 	return book, nil
 }
 
-
 // GetAllBooks fetches all books from database
 func (s Server) GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatabase, error) {
 	query := `SELECT id, isbn, title, author, published, pages, status FROM books`
@@ -109,7 +103,6 @@ func (s Server) GetAllBooks(ctx context.Context) ([]entity.BookResponseFromDatab
 	return books, nil
 }
 
-
 // EditBook edits book's data
 func (s Server) EditBook(ctx context.Context, status entity.EditBookReq, id int) (entity.BookResponseFromDatabase, error) {
 	query := `UPDATE books SET 
@@ -119,13 +112,13 @@ func (s Server) EditBook(ctx context.Context, status entity.EditBookReq, id int)
 	`
 
 	var book entity.BookResponseFromDatabase
-	if err := s.DB.GetContext(ctx, &book, query, 
-		status.Book.Isbn, 
-		status.Book.Title, 
-		status.Book.Author, 
-		status.Book.Published, 
-		status.Book.Pages, 
-		status.Status, 
+	if err := s.DB.GetContext(ctx, &book, query,
+		status.Book.Isbn,
+		status.Book.Title,
+		status.Book.Author,
+		status.Book.Published,
+		status.Book.Pages,
+		status.Status,
 		id); err != nil {
 		return entity.BookResponseFromDatabase{}, err
 	}
@@ -144,7 +137,6 @@ func (s Server) DeleteBook(ctx context.Context, id int) error {
 
 	return nil
 }
-
 
 // delete this functions was written to be used as a cleanUP function inside intigrations tests
 func (s Server) delete() error {
