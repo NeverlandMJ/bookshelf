@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,6 +15,7 @@ import (
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
 	"github.com/NeverlandMJ/bookshelf/service"
 	"github.com/gin-gonic/gin"
+	cache "github.com/patrickmn/go-cache"
 )
 
 type Handler struct {
@@ -28,6 +28,12 @@ func NewHandler(srv *service.Service) Handler {
 	}
 }
 
+var newCache *cache.Cache
+
+func init() {
+	newCache = cache.New(-1, -1)
+}
+
 func (h Handler) SignUp(c *gin.Context) {
 	var req entity.UserSignUpRequest
 	if err := c.BindJSON(&req); err != nil {
@@ -38,7 +44,6 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(req)
 	if err := req.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"isOk":    false,
@@ -56,7 +61,7 @@ func (h Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(user)
+	newCache.Set(user.Key, user.Secret, -1)
 
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,
@@ -67,8 +72,6 @@ func (h Handler) SignUp(c *gin.Context) {
 
 func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
-	sign := c.GetHeader("Sign")
-
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
 		if errors.Is(err, customErr.ErrNotFound) {
@@ -81,35 +84,6 @@ func (h Handler) GetUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
-		})
-		return
-	}
-
-	// if reflect.DeepEqual(user, entity.ResponseBook{}) {
-	// 	c.JSON(http.StatusUnauthorized, gin.H{
-	// 		"isOk":    false,
-	// 		"message": err.Error(),
-	// 	})
-	// 	return
-	// }
-
-	scheme := "http://"
-	if c.Request.TLS != nil {
-		scheme = "https://"
-	}
-	url := scheme + c.Request.Host + c.Request.URL.Path
-
-	jsonData, _ := ioutil.ReadAll(c.Request.Body)
-	fmt.Println(string(jsonData))
-
-	secretByte := md5.Sum([]byte(c.Request.Method + url + string(jsonData) + user.Secret))
-
-	secret := fmt.Sprintf("%x", secretByte)
-
-	if secret != sign {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": "incorrect sign",
 		})
 		return
 	}
