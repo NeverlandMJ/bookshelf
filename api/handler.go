@@ -91,19 +91,15 @@ func (h Handler) GetUser(c *gin.Context) {
 	r := c.Request.URL
 	url := r.String()
 
-	body := []byte{}
-	c.Request.Body.Read(body)
-
-	secretByte := md5.Sum([]byte(c.Request.Method + url + string(body) + user.Secret))
+	secretByte := md5.Sum([]byte(c.Request.Method + url + user.Secret))
 
 	secret := fmt.Sprintf("%x", secretByte)
 
-	message := fmt.Sprintf("method: %s\n url: %s\n body: %s\n secret: %s", c.Request.Method, url, string(body), secret)
 
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": message + "sign and secret is not equal" + secret  + " " + sign,
+			"message": "secret: "+secret + " sign: " + sign,
 		})
 		c.Abort()
 		return
