@@ -23,7 +23,7 @@ func NewRouter(serv *service.Service) *gin.Engine {
 	})
 
 	authorized := router.Group("/")
-	// authorized.Use(Authentication)
+	authorized.Use(Authentication)
 	authorized.GET("/myself", h.GetUser)
 	authorized.POST("/books", h.SaveBook)
 	authorized.GET("/books", h.GetAllBooks)

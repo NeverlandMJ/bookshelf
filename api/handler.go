@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -68,8 +69,17 @@ func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
 	secret := c.GetHeader("Sign")
 	fmt.Println(secret)
+	
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"isOk":    false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if reflect.DeepEqual(user, entity.ResponseBook{}){
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
