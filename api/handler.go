@@ -95,9 +95,9 @@ func (h Handler) GetUser(c *gin.Context) {
 	}
 
 	scheme := "http://"
-	// if c.Request.TLS != nil {
-	// 	scheme = "https://"
-	// }
+	if c.Request.TLS != nil {
+		scheme = "https://"
+	}
 	url := scheme + c.Request.Host + c.Request.URL.Path
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
@@ -107,15 +107,16 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	secret := fmt.Sprintf("%x", secretByte)
 
-	fmt.Println("method: ", c.Request.Method)
-	fmt.Println("url: ", url)
-	fmt.Println("body: ", string(jsonData))
-	fmt.Println("secret: ", user.Secret)
+	m := fmt.Sprintf("method: %s", c.Request.Method)
+	u := fmt.Sprintf("url: %s", url)
+	b := fmt.Sprintf("body: %s", string(jsonData))
+	s := fmt.Sprintf("secret: %s", user.Secret)
 
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
-			"message": "sign is not correct",
+			"message": m+u+b+s+" = " + secret,
+			"sign": sign,
 		})
 		return
 	}
