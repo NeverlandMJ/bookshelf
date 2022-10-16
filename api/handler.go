@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -68,7 +67,7 @@ func (h Handler) SignUp(c *gin.Context) {
 
 func (h Handler) GetUser(c *gin.Context) {
 	key := c.GetHeader("Key")
-	sign := c.GetHeader("Sign")
+	// sign := c.GetHeader("Sign")
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
@@ -90,22 +89,21 @@ func (h Handler) GetUser(c *gin.Context) {
 	// r := c.Request.URL
 	// url := r.String()
 
-	jsonData, _ := ioutil.ReadAll(c.Request.Body)
-	fmt.Println(string(jsonData))
+	// jsonData, _ := ioutil.ReadAll(c.Request.Body)
+	// fmt.Println(string(jsonData))
 
-	secretByte := md5.Sum([]byte("GET" + "/myself" +"{"+string(jsonData)+"}" + user.Secret))
+	// secretByte := md5.Sum([]byte(c.Request.Method + url + string(jsonData) + user.Secret))
 
-	secret := fmt.Sprintf("%x", secretByte)
+	// secret := fmt.Sprintf("%x", secretByte)
 
-
-	if secret != sign {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"isOk":    false,
-			"message": "secret: "+secret + " sign: " + sign,
-		})
-		c.Abort()
-		return
-	}
+	// if secret != sign {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{
+	// 		"isOk":    false,
+	// 		"message": "secret: " + secret + " sign: " + sign,
+	// 	})
+	// 	c.Abort()
+	// 	return
+	// }
 
 	c.JSON(http.StatusOK, entity.Response{
 		Data:    user,
