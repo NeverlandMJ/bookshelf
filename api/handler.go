@@ -72,7 +72,7 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	user, err := h.srvc.GetUser(context.Background(), key)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"isOk":    false,
 			"message": err.Error(),
 		})
