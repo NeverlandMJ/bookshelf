@@ -12,6 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Connect connects to the postgres and migrates
 func Connect(cfg config.Config) (*sqlx.DB, error) {
 	db, err := sqlx.Connect(
 		"postgres",
@@ -34,7 +35,7 @@ func Connect(cfg config.Config) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	if err = m.Drop(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return nil, err
 	}
 
