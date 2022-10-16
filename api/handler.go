@@ -94,8 +94,11 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	r := c.Request.URL
-	url := r.String()
+	scheme := "http://"
+	if c.Request.TLS != nil {
+		scheme = "https://"
+	}
+	url := scheme + c.Request.Host + c.Request.URL.Path
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	fmt.Println(string(jsonData))
@@ -103,6 +106,11 @@ func (h Handler) GetUser(c *gin.Context) {
 	secretByte := md5.Sum([]byte(c.Request.Method + url + string(jsonData) + user.Secret))
 
 	secret := fmt.Sprintf("%x", secretByte)
+
+	fmt.Println("method: ", c.Request.Method)
+	fmt.Println("url: ", url)
+	fmt.Println("body: ", string(jsonData))
+	fmt.Println("secret: ", user.Secret)
 
 	if secret != sign {
 		c.JSON(http.StatusUnauthorized, gin.H{
