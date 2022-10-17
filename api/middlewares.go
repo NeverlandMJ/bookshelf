@@ -48,6 +48,7 @@ func (h Handler) Authentication(c *gin.Context) {
 			c.Abort()
 			return
 		}
+		newCache.Set(user.Key, user.Secret, -1)
 		userSecret = user.Secret
 	}
 

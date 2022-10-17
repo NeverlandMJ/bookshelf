@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NeverlandMJ/bookshelf/pkg/customErr"
 	"github.com/NeverlandMJ/bookshelf/pkg/entity"
@@ -32,7 +33,7 @@ func NewHandler(srv *service.Service) Handler {
 var newCache *cache.Cache
 
 func init() {
-	newCache = cache.New(-1, -1)
+	newCache = cache.New(time.Hour*2, time.Hour*2)
 }
 
 func (h Handler) SignUp(c *gin.Context) {
